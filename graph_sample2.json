@@ -1,0 +1,82 @@
+{
+  "connections": {
+    "0": 3,
+    "1": 4,
+    "2": 5
+  },
+  "nodes": [
+    {
+      "name": "audio_mixer_node",
+      "volume": 1.0,
+      "inputs": [
+        {
+          "id": 3,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        },
+        {
+          "id": 4,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        },
+        {
+          "id": 5,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "audio_file_node",
+      "path": "test1.mp3",
+      "volume": 1.0,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": 0,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "audio_file_node",
+      "path": "test2.mp3",
+      "volume": 1.0,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": 1,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "audio_file_node",
+      "path": "test3.mp3",
+      "volume": 1.0,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": 2,
+          "format": {
+            "sample_rate": 0,
+            "channels": 0
+          }
+        }
+      ]
+    }
+  ]
+}

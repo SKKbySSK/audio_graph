@@ -37,7 +37,6 @@ class _MyAppState extends State<MyApp> {
       "test1.mp3",
       "test2.mp3",
       "test3.mp3",
-      "test4.m4a",
     ];
 
     final List<AudioFileNode> files = List();

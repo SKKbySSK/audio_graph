@@ -31,7 +31,6 @@ class AudioEngineNodePlugin: NSObject, FlutterPlugin {
         case "get_position":
             guard let posNode = node as? AudioPositionableNode else { return }
             let pos = posNode.position
-            print(pos)
             result(pos)
         case "set_position":
             let pos: Double = args[1] as! Double

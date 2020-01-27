@@ -4,14 +4,14 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'audio_graph'
-  s.version          = '0.0.1'
+  s.version          = '0.0.3'
   s.summary          = 'Flutter plugin to build custom audio graph'
   s.description      = <<-DESC
 Flutter plugin to build custom audio graph
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/SKKbySSK/audio_engine'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Your Company' => 'skkbyssk@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'

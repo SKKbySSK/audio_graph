@@ -1,6 +1,6 @@
 name: audio_graph
 description: Flutter plugin to build custom audio graph
-version: 0.0.1
+version: 0.0.3
 homepage: https://github.com/SKKbySSK/audio_engine
 
 environment:
@@ -24,5 +24,10 @@ flutter:
   # be modified. They are used by the tooling to maintain consistency when
   # adding or updating assets for this project.
   plugin:
-    androidPackage: work.ksprogram.audio_graph
-    pluginClass: AudioGraphPlugin
+    platforms:
+      android:
+        package: work.ksprogram.audio_graph
+        pluginClass: AudioGraphPlugin
+      ios:
+        package: work.ksprogram.audio_graph
+        pluginClass: AudioGraphPlugin

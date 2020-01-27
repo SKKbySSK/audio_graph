@@ -21,6 +21,19 @@ class AudioGraphManagerPlugin: NSObject, FlutterPlugin {
         
         let engine: AVAudioEngine
         let nodes: [AudioEngineNode]
+        
+        func dispose() {
+            engine.stop()
+            
+            for node in nodes {
+                for con in node.inputConnections {
+                    engine.disconnectNodeInput(node.engineNode, bus: con.inBus!)
+                }
+                
+                node.dispose()
+                AudioEngineNodePlugin.nodes.removeValue(forKey: node.node.id)
+            }
+        }
     }
     
     static let id = IdManager(key: "GraphManager")
@@ -33,10 +46,7 @@ class AudioGraphManagerPlugin: NSObject, FlutterPlugin {
         
         switch call.method {
         case "dispose":
-            for node in graph.nodes {
-                AudioEngineNodePlugin.nodes.removeValue(forKey: node.node.id)
-            }
-            
+            graph.dispose()
             if AudioGraphManagerPlugin.graphs.removeValue(forKey: graphId) != nil {
                 result(true)
             } else {

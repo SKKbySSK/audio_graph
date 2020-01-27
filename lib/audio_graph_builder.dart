@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:audio_graph/audio_format.dart';
 import 'package:audio_graph/audio_graph.dart';
+import 'package:audio_graph/error.dart';
 import 'package:audio_graph/nodes/audio_node.dart';
 import 'package:audio_graph/pins/pins.dart';
 import 'package:flutter/services.dart';

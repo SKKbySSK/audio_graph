@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:audio_graph/audio_graph_builder.dart';
 import 'package:audio_graph/audio_graph.dart';
-import 'package:audio_graph/nodes/audio_node.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 void main() => runApp(MyApp());
 
@@ -19,9 +19,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   AudioGraph graph;
-  AudioFileNode file1, file2, file3;
+  List<AudioFileNode> files;
   AudioMixerNode mixer;
   bool ignoreUpdate = false;
+  bool playAll = true;
 
   @override
   void initState() {
@@ -31,47 +32,57 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    final path1 = await setupMusicFile("test1.mp3");
-    final path2 = await setupMusicFile("test2.m4a");
-    final path3 = await setupMusicFile("test3.m4a");
+    final List<String> filePaths = List();
+    final assetFiles = [
+      "test1.mp3",
+      "test2.mp3",
+      "test3.mp3",
+      "test4.m4a",
+    ];
 
-    final file1 = AudioFileNode(path1);
-    final file2 = AudioFileNode(path2);
-    final file3 = AudioFileNode(path3);
+    final List<AudioFileNode> files = List();
+
+    for (final asset in assetFiles) {
+      final path = await setupMusicFile(asset);
+      files.add(await AudioFileNode.createNode(path));
+    }
+
+    for (final path in filePaths) {
+      files.add(await AudioFileNode.createNode(path));
+    }
+
     final output = AudioDeviceOutputNode();
-
-    await file1.prepare();
-    await file2.prepare();
-    await file3.prepare();
 
     setState(() {
       mixer = AudioMixerNode();
-      this.file1 = file1;
-      this.file2 = file2;
-      this.file3 = file3;
+      this.files = files;
     });
 
     final builder = AudioGraphBuilder();
-    builder.nodes.addAll([mixer, file1, file2, file3, output]);
+    builder.nodes.addAll(files);
+    builder.nodes.addAll([mixer, output]);
 
-    final in1 = mixer.appendInputPin();
-    final in2 = mixer.appendInputPin();
-    final in3 = mixer.appendInputPin();
+    for (final file in files) {
+      builder.connect(file.outputPin, mixer.appendInputPin());
+    }
 
-    builder.connect(file1.outputPin, in1);
-    builder.connect(file2.outputPin, in2);
-    builder.connect(file3.outputPin, in3);
     builder.connect(mixer.outputPin, output.inputPin);
-    graph = await builder.build();
+
+    try {
+      graph = await builder.build();
+    } on PlatformException catch (e) {
+      print(e.code);
+      print(e.message);
+    }
 
     Timer.periodic(Duration(milliseconds: 200), (timer) async {
       if (ignoreUpdate) {
         return;
       }
 
-      await file1?.updatePosition();
-      await file2?.updatePosition();
-      await file3?.updatePosition();
+      for (final file in files) {
+        await file.updatePosition();
+      }
 
       setState(() {});
     });
@@ -94,6 +105,25 @@ class _MyAppState extends State<MyApp> {
         ),
         body: ListView(
           children: <Widget>[
+            Center(
+              child: Text("Main Mixer"),
+            ),
+            Center(
+              child: IconButton(
+                icon: Icon(Icons.audiotrack),
+                onPressed: () {
+                  for (final file in files) {
+                    if (playAll) {
+                      file.play();
+                    } else {
+                      file.pause();
+                    }
+                  }
+
+                  playAll = !playAll;
+                },
+              ),
+            ),
             Slider(
               value: mixer?.volume ?? 0,
               onChanged: (value) {
@@ -102,58 +132,61 @@ class _MyAppState extends State<MyApp> {
                 });
               },
             ),
-            buildListTile(file1),
-            buildListTile(file2),
-            buildListTile(file3),
-          ],
+          ]..addAll(files?.map((f) => buildListTile(f)) ?? []),
         ),
       ),
     );
   }
 
   Widget buildListTile(AudioFileNode file) {
-    return Row(
+    return Column(
       children: <Widget>[
-        Column(
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.audiotrack),
-              onPressed: () {
-                if (file.isPlaying) {
-                  file.pause();
-                } else {
-                  file.play();
-                }
-              },
-            ),
-            Slider(
-              value: file?.volume ?? 0,
-              onChanged: (value) {
-                setState(() {
-                  file.volume = value;
-                });
-              },
-            ),
-            Slider(
-              min: 0,
-              max: file?.duration ?? 0,
-              value: file?.position ?? 0,
-              onChangeStart: (_) {
-                ignoreUpdate = true;
-              },
-              onChangeEnd: (_) {
-                ignoreUpdate = false;
-              },
-              onChanged: (value) {
-                setState(() {
-                  file.position = value;
-                });
-              },
-            )
-          ],
+        Text(path.basename(file.path)),
+        IconButton(
+          icon: Icon(Icons.audiotrack),
+          onPressed: () {
+            if (file.isPlaying) {
+              file.pause();
+            } else {
+              file.play();
+            }
+          },
+        ),
+        Slider(
+          value: file?.volume ?? 0,
+          onChanged: (value) {
+            setState(() {
+              file.volume = value;
+            });
+          },
+        ),
+        Slider(
+          min: 0,
+          max: file?.duration ?? 0,
+          value: min(file?.position ?? 0, file?.duration ?? 0),
+          onChangeStart: (_) {
+            ignoreUpdate = true;
+          },
+          onChangeEnd: (_) {
+            ignoreUpdate = false;
+          },
+          onChanged: (value) {
+            if (ignoreUpdate) {
+              return setState(() {
+                file.position = value;
+              });
+            }
+          },
         )
       ],
     );
+  }
+
+  @override
+  void reassemble() {
+    graph.dispose();
+    initPlatformState();
+    super.reassemble();
   }
 
   @override

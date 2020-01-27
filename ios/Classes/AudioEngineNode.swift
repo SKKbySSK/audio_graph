@@ -28,6 +28,13 @@ protocol AudioEngineNode: class {
     var inputConnections: [AudioNodeConnection] { get }
     var outputConnections: [AudioNodeConnection] { get }
     var shouldAttach: Bool { get }
+    
+    func dispose()
+}
+
+extension AudioEngineNode {
+    func dispose() {
+    }
 }
 
 protocol AudioControllableNode: class {
@@ -143,6 +150,10 @@ class AudioEngineFileNode: AudioEngineNode, AudioControllableNode, AudioVolumeEd
         lastPosition = position
         playerNode.pause()
         isPlaying = false
+    }
+    
+    func dispose() {
+        playerNode.stop()
     }
 }
 

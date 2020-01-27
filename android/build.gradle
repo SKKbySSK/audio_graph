@@ -31,14 +31,20 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
         disable 'InvalidPackage'
     }
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2'
 }

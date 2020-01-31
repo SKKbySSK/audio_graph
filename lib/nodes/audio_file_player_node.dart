@@ -5,6 +5,7 @@ import 'package:audio_graph/nodes/audio_node.dart';
 import 'package:audio_graph/pins/pins.dart';
 import 'package:flutter/services.dart';
 
+/// AudioFilePlayerNode can decode the local audio file and control playback.
 class AudioFilePlayerNode extends AudioSourceNode {
   static const String name = 'audio_file_player_node';
   static const MethodChannel _channel = MethodChannel("audio_graph/file");

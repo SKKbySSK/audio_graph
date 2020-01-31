@@ -3,6 +3,8 @@ import 'package:audio_graph/pins/pins.dart';
 
 import '../audio_format.dart';
 
+/// AudioDeviceOutputNode produces the audio data to the device's default output.
+/// Currently, we don't support changing device's output.
 class AudioDeviceOutputNode extends AudioOutputNode {
   static const String name = 'audio_device_output_node';
 

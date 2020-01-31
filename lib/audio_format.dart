@@ -1,10 +1,14 @@
+/// AudioFormat defines the format of the audio source
 class AudioFormat {
   const AudioFormat(this.sampleRate, this.channels);
   const AudioFormat.any()
       : this.sampleRate = 0,
         this.channels = 0;
 
+  /// Sample rate in Hz
   final int sampleRate;
+
+  /// Channel count
   final int channels;
 
   AudioFormat.fromJson(Map<String, dynamic> json)

@@ -1,3 +1,4 @@
+/// IdManager is used by internal classes
 class IdManager {
   static Map<String, int> _counter = Map();
 

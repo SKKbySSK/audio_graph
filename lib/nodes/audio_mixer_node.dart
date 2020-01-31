@@ -2,6 +2,8 @@ import 'package:audio_graph/audio_format.dart';
 import 'package:audio_graph/nodes/audio_node.dart';
 import 'package:audio_graph/pins/pins.dart';
 
+/// AudioMixerNode can mix multiple audio data(output pin)
+/// You can add input pin by calling appendInputPin()
 class AudioMixerNode extends AudioNode {
   static const String name = 'audio_mixer_node';
   OutputPin outputPin = OutputPin(AudioFormat.any());

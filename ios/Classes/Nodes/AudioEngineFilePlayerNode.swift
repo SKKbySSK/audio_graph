@@ -9,7 +9,7 @@ import Foundation
 import AVFoundation
 
 class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVolumeEditableNode, AudioPositionableNode, AudioPreparableNode {
-    static let nodeName = "audio_file_node"
+    static let nodeName = "audio_file_player_node"
     
     private var isPrepared = false
     private var isPlaying = false

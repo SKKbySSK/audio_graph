@@ -207,7 +207,10 @@ class AudioEngineDeviceOutputNode: AudioEngineNode {
         self.inputConnections = inputConnections
         self.outputConnections = outputConnections
         
-        inputConnections.first!.inBus = 0
-        engineNode = engine.outputNode
+        for (index, input) in inputConnections.enumerated() {
+            input.inBus = index
+        }
+        
+        engineNode = engine.mainMixerNode
     }
 }

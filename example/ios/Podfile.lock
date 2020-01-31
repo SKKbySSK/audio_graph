@@ -1,5 +1,5 @@
 PODS:
-  - audio_graph (0.0.1):
+  - audio_graph (0.0.3):
     - Flutter
   - Flutter (1.0.0)
   - path_provider (0.0.1):
@@ -19,7 +19,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
-  audio_graph: c8cc60c6cac09b339f52c25001958970cc9a51f4
+  audio_graph: 229cd2c777a711268281a158d9faf51764aebca8
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
 

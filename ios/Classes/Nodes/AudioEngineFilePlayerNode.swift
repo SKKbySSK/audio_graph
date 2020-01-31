@@ -87,7 +87,7 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
         
         let file = try! AVAudioFile(forReading: url)
         playing = (url, file)
-        position = 0 // This will reschedule automatically
+        position = lastPosition // This will reschedule automatically
         isPrepared = true
     }
     

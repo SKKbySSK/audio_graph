@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -90,7 +89,7 @@ class _MyAppState extends State<MyApp> {
   Future<String> setupMusicFile(String assetUri) async {
     final dir = await getApplicationDocumentsDirectory();
     final file = File('${dir.path}/$assetUri');
-    var data = await rootBundle.load('assets/${assetUri}');
+    var data = await rootBundle.load('assets/$assetUri');
     await file.writeAsBytes(data.buffer.asInt8List());
     return file.path;
   }

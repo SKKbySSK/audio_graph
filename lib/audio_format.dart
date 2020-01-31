@@ -26,4 +26,7 @@ class AudioFormat {
 
     return false;
   }
+
+  @override
+  int get hashCode => (sampleRate * channels).hashCode;
 }

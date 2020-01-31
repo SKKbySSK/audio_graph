@@ -6,7 +6,7 @@ import java.util.*
 
 class AudioFilePlayerNode(id: Int, val path: String, val bufferDurationSeconds: Double = 0.2, val maximumBufferCount: Int = 5): work.ksprogram.audio_graph.nodes.AudioOutputNode(id), work.ksprogram.audio_graph.nodes.PlayableNode, work.ksprogram.audio_graph.nodes.PositionableNode, work.ksprogram.audio_graph.audio.AudioFileDecoderCallback, work.ksprogram.audio_graph.audio.BufferSinkCallback {
     companion object {
-        const val nodeName = "audio_file_node"
+        const val nodeName = "audio_file_player_node"
     }
 
     private var buffers: Queue<work.ksprogram.audio_graph.audio.AudioBuffer> = ArrayDeque<work.ksprogram.audio_graph.audio.AudioBuffer>()

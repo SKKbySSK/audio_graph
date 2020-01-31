@@ -17,6 +17,9 @@ To dispose audio resources, use AudioGraph.dispose().
 
 Please note that AudioNode can only be used once. If you dispose the parent graph, you must not use the node.
 
+### Example
+See comments of [example/main.dart](https://github.com/SKKbySSK/audio_graph/blob/master/example/lib/main.dart)
+
 ### AudioNodes
 AudioNode is a base class.
 You can use these AudioNodes
@@ -35,4 +38,4 @@ AVAudioEngine is used in iOS.
 
 ### Android implementation
 AudioFileNode is using MediaCodec and MediaExtractor.
-AudioTrack is used for AudioDeviceOutputNode.
+AudioDeviceOutputNode is using AudioTrack.

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -27,46 +26,67 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    initAudioGraph();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
+  // Extract the asset data and export to the app's document directory
+  Future<String> setupMusicFile(String assetUri) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/$assetUri');
+    var data = await rootBundle.load('assets/$assetUri');
+    await file.writeAsBytes(data.buffer.asInt8List());
+    return file.path;
+  }
+
+  // Initialize the AudioGraph
+  Future<void> initAudioGraph() async {
+    final List<AudioFilePlayerNode> files = List();
+
+    // Create AudioFilePlayerNodes from local files
     final List<String> filePaths = List();
+
+    for (final path in filePaths) {
+      files.add(await AudioFilePlayerNode.createNode(path));
+    }
+
+    // Create AudioFilePlayerNodes from assets
+    // You should add these files to example/assets/ folder to test in your local workspace
     final assetFiles = [
       "test1.mp3",
       "test2.mp3",
       "test3.mp3",
     ];
 
-    final List<AudioFilePlayerNode> files = List();
-
     for (final asset in assetFiles) {
       final path = await setupMusicFile(asset);
       files.add(await AudioFilePlayerNode.createNode(path));
     }
 
-    for (final path in filePaths) {
-      files.add(await AudioFilePlayerNode.createNode(path));
-    }
-
+    // AudioDeviceOutputNode is an output node to produce audio data to the speaker.
     final output = AudioDeviceOutputNode();
 
+    // When all players and output node is prepared, set AudioMixerNode and rebuild UI.
     setState(() {
       mixer = AudioMixerNode();
       this.files = files;
     });
 
+    // Add player, mixer, output nodes to the AudioGraphBuilder
     final builder = AudioGraphBuilder();
     builder.nodes.addAll(files);
     builder.nodes.addAll([mixer, output]);
 
+    // Connect the AudioFilePlayerNode to AudioMixerNode's next input pin.
+    // AudioGraph should look like this AudioFilePlayerNode -> AudioMixerNode
     for (final file in files) {
       builder.connect(file.outputPin, mixer.appendInputPin());
     }
 
+    // Connect the AudioMixerNode's output pin to AudioDeviceOutputNode's input pin
     builder.connect(mixer.outputPin, output.inputPin);
 
+    // Build the graph and receive it.
+    // You MUST dispose the graph when you don't need it.
     try {
       graph = await builder.build();
     } on PlatformException catch (e) {
@@ -85,14 +105,6 @@ class _MyAppState extends State<MyApp> {
 
       setState(() {});
     });
-  }
-
-  Future<String> setupMusicFile(String assetUri) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/$assetUri');
-    var data = await rootBundle.load('assets/${assetUri}');
-    await file.writeAsBytes(data.buffer.asInt8List());
-    return file.path;
   }
 
   @override
@@ -183,8 +195,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void reassemble() {
-    graph.dispose();
-    initPlatformState();
+    // Rebuild the graph when hot reload is executed
+    graph?.dispose();
+    initAudioGraph();
     super.reassemble();
   }
 

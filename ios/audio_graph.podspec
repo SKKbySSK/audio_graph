@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'audio_graph'
-  s.version          = '0.0.4'
+  s.version          = '0.0.5'
   s.summary          = 'Flutter plugin to build custom audio graph'
   s.description      = <<-DESC
 Flutter plugin to build custom audio graph

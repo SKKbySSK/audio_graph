@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   AudioGraph graph;
-  List<AudioFileNode> files;
+  List<AudioFilePlayerNode> files;
   AudioMixerNode mixer;
   bool ignoreUpdate = false;
   bool playAll = true;
@@ -39,15 +39,15 @@ class _MyAppState extends State<MyApp> {
       "test3.mp3",
     ];
 
-    final List<AudioFileNode> files = List();
+    final List<AudioFilePlayerNode> files = List();
 
     for (final asset in assetFiles) {
       final path = await setupMusicFile(asset);
-      files.add(await AudioFileNode.createNode(path));
+      files.add(await AudioFilePlayerNode.createNode(path));
     }
 
     for (final path in filePaths) {
-      files.add(await AudioFileNode.createNode(path));
+      files.add(await AudioFilePlayerNode.createNode(path));
     }
 
     final output = AudioDeviceOutputNode();
@@ -137,7 +137,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget buildListTile(AudioFileNode file) {
+  Widget buildListTile(AudioFilePlayerNode file) {
     return Column(
       children: <Widget>[
         Text(path.basename(file.path)),

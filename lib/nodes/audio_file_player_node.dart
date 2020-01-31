@@ -5,8 +5,8 @@ import 'package:audio_graph/nodes/audio_node.dart';
 import 'package:audio_graph/pins/pins.dart';
 import 'package:flutter/services.dart';
 
-class AudioFileNode extends AudioSourceNode {
-  static const String name = 'audio_file_node';
+class AudioFilePlayerNode extends AudioSourceNode {
+  static const String name = 'audio_file_player_node';
   static const MethodChannel _channel = MethodChannel("audio_graph/file");
 
   bool _isPlaying = false;
@@ -34,17 +34,18 @@ class AudioFileNode extends AudioSourceNode {
   @override
   List<OutputPin> get outputPins => List.unmodifiable(_outputs);
 
-  static Future<AudioFileNode> createNode(String path) async {
-    final node = AudioFileNode._(path);
+  static Future<AudioFilePlayerNode> createNode(String path) async {
+    final node = AudioFilePlayerNode._(path);
     await node._prepare();
     return node;
   }
 
-  AudioFileNode._(this.path) {
+  AudioFilePlayerNode._(this.path) {
     _commonInit();
   }
 
-  AudioFileNode.fromJson(Map<String, dynamic> json) : path = json['path'] {
+  AudioFilePlayerNode.fromJson(Map<String, dynamic> json)
+      : path = json['path'] {
     _commonInit();
   }
 

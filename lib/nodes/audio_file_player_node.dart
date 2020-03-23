@@ -7,27 +7,36 @@ import 'package:flutter/services.dart';
 
 /// AudioFilePlayerNode can decode the local audio file and control playback.
 class AudioFilePlayerNode extends AudioSourceNode {
+  AudioFilePlayerNode._(this.path) {
+    _commonInit();
+  }
+
+  AudioFilePlayerNode.fromJson(Map<String, dynamic> json)
+      : path = json['path'] as String {
+    _commonInit();
+  }
+
   static const String name = 'audio_file_player_node';
-  static const MethodChannel _channel = MethodChannel("audio_graph/file");
+  static const MethodChannel _channel = MethodChannel('audio_graph/file');
 
   bool _isPlaying = false;
   double _position = 0;
   double _duration = 0;
 
-  get isPlaying => _isPlaying;
-  get position => _position;
+  bool get isPlaying => _isPlaying;
+  double get position => _position;
   set position(double value) {
     _position = value;
-    send('set_position', [_position]);
+    send<void>('set_position', <dynamic>[_position]);
   }
 
-  get duration => _duration;
+  double get duration => _duration;
 
   final String path;
   OutputPin outputPin;
 
-  List<InputPin> _inputs = List();
-  List<OutputPin> _outputs = List();
+  final _inputs = <InputPin>[];
+  final _outputs = <OutputPin>[];
 
   @override
   List<InputPin> get inputPins => List.unmodifiable(_inputs);
@@ -41,25 +50,18 @@ class AudioFilePlayerNode extends AudioSourceNode {
     return node;
   }
 
-  AudioFilePlayerNode._(this.path) {
-    _commonInit();
-  }
-
-  AudioFilePlayerNode.fromJson(Map<String, dynamic> json)
-      : path = json['path'] {
-    _commonInit();
-  }
-
   Future _prepare() async {
-    _duration = await _channel.invokeMethod("get_duration", [path]);
-    final jsonFormat = await _channel.invokeMethod("get_format", [path]);
-    final format = AudioFormat.fromJson(jsonDecode(jsonFormat));
+    _duration = await _channel.invokeMethod('get_duration', [path]);
+    final jsonFormat =
+        await _channel.invokeMethod<String>('get_format', <dynamic>[path]);
+    final format =
+        AudioFormat.fromJson(jsonDecode(jsonFormat) as Map<String, dynamic>);
     outputPin = OutputPin(format);
     _outputs.add(outputPin);
   }
 
   void _commonInit() {
-    parameters['path'] = this.path;
+    parameters['path'] = path;
   }
 
   @override
@@ -67,15 +69,16 @@ class AudioFilePlayerNode extends AudioSourceNode {
 
   Future play() async {
     _isPlaying = true;
-    await send('play', []);
+    await send<void>('play', <dynamic>[]);
   }
 
   Future pause() async {
     _isPlaying = false;
-    await send('pause', []);
+    await send<void>('pause', <dynamic>[]);
   }
 
   Future<double> updatePosition() async {
-    return _position = await send('get_position', []);
+    final pos = await send<double>('get_position', <dynamic>[]);
+    return _position = pos;
   }
 }

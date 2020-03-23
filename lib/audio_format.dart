@@ -2,8 +2,12 @@
 class AudioFormat {
   const AudioFormat(this.sampleRate, this.channels);
   const AudioFormat.any()
-      : this.sampleRate = 0,
-        this.channels = 0;
+      : sampleRate = 0,
+        channels = 0;
+
+  AudioFormat.fromJson(Map<String, dynamic> json)
+      : sampleRate = json['sample_rate'] as int,
+        channels = json['channels'] as int;
 
   /// Sample rate in Hz
   final int sampleRate;
@@ -11,21 +15,17 @@ class AudioFormat {
   /// Channel count
   final int channels;
 
-  AudioFormat.fromJson(Map<String, dynamic> json)
-      : sampleRate = json['sample_rate'],
-        channels = json['channels'];
-
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'sample_rate': sampleRate,
       'channels': channels,
     };
   }
 
   @override
-  bool operator ==(Object format) {
-    if (format is AudioFormat && format != null) {
-      return sampleRate == format.sampleRate && channels == format.channels;
+  bool operator ==(Object other) {
+    if (other is AudioFormat) {
+      return sampleRate == other.sampleRate && channels == other.channels;
     }
 
     return false;

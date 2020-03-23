@@ -6,27 +6,26 @@ import 'package:flutter/services.dart';
 /// All nodes have one or more input pin and output pin.
 /// You can connect these pins using AudioGraphBuilder.
 /// Also, all nodes have volume property to control it.
-/// Due to audio processing requires high performance process, We don't support creating custom node
 abstract class AudioNode {
-  static const MethodChannel _channel = MethodChannel("audio_graph/node");
+  static const MethodChannel _channel = MethodChannel('audio_graph/node');
 
-  int _id = IdManager.generate("Node");
-  get id => _id;
+  final _id = IdManager.generate('Node');
+  int get id => _id;
 
   double _volume = 1;
 
   /// Get volume of the node
-  get volume => _volume;
+  double get volume => _volume;
 
   /// Set volume of the node
   set volume(double newValue) {
     _volume = newValue;
-    send('volume', [newValue]);
+    send<void>('volume', <dynamic>[newValue]);
   }
 
   /// Custom parameters of the node
   /// This property is used internally
-  Map<String, String> parameters = Map();
+  final Map<String, String> parameters = <String, String>{};
 
   /// Name to determine the type of the node
   /// This property is used internally
@@ -39,7 +38,7 @@ abstract class AudioNode {
   List<OutputPin> get outputPins;
 
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'id': id,
       'name': nodeName,
       'volume': volume,
@@ -51,10 +50,10 @@ abstract class AudioNode {
 
   /// Send the message using PlatformChannel
   /// Do not use this function outside of the node class
-  Future<dynamic> send(String method, List<dynamic> arguments) {
-    List<dynamic> args = [id];
+  Future<T> send<T>(String method, List<dynamic> arguments) {
+    final args = <dynamic>[id];
     args.addAll(arguments);
-    return _channel.invokeMethod(method, args);
+    return _channel.invokeMethod<T>(method, args);
   }
 }
 

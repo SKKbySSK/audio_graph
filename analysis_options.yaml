@@ -1,2 +1,7 @@
 # https://pub.dev/packages/pedantic_mono
 include: package:pedantic_mono/analysis_options.yaml
+
+linter:
+  rules:
+    cascade_invocations: false
+    avoid_classes_with_only_static_members: false

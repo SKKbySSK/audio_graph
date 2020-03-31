@@ -1,4 +1,4 @@
-package audio
+package work.ksprogram.audio_graph.audio
 
 class Volume {
     companion object {

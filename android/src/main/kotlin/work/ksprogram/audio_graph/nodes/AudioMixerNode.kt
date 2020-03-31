@@ -1,7 +1,9 @@
-package nodes
+package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import work.ksprogram.audio_graph.audio.AudioFormatException
+import work.ksprogram.audio_graph.audio.Volume
 import java.util.*
 
 class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, OutputNodeCallback {
@@ -11,7 +13,7 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
 
     private var buffers: Queue<Pair<MediaCodec.BufferInfo, ByteArray>> = ArrayDeque()
     private var thread: Thread? = null
-    private val sources: MutableList<nodes.AudioOutputNode> = mutableListOf()
+    private val sources: MutableList<AudioOutputNode> = mutableListOf()
     private var currentFormat: MediaFormat? = null
 
     private fun mixingThread() {
@@ -20,7 +22,7 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
             val length = this.sources.count()
 
             if (buffers.count() > 0) {
-                val minPair = buffers.minBy({ it.second.size })!!
+                val minPair = buffers.minBy { it.second.size }!!
                 val size = minPair.second.size
                 val buf = Array(size) { i ->
                     var result = 0
@@ -33,7 +35,7 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
                     return@Array result.toByte()
                 }.toByteArray()
 
-                audio.Volume.applyVolume(buf, volume)
+                Volume.applyVolume(buf, volume)
 
                 this.buffers.add(Pair(minPair.first, buf))
                 callback?.bufferAvailable(this)
@@ -64,23 +66,23 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
     }
 
     override fun prepared(node: AudioOutputNode) {
-        if (sources.all { it.getPreparationState() == PreparationState.prepared }) {
+        if (sources.all { it.getPreparationState() == PreparationState.Prepared }) {
             callback?.prepared(this)
         }
     }
 
     override fun getPreparationState(): PreparationState {
-        if (sources.all { it.getPreparationState() == PreparationState.prepared }) {
-            return PreparationState.prepared
+        return if (sources.all { it.getPreparationState() == PreparationState.Prepared }) {
+            PreparationState.Prepared
         } else {
-            return PreparationState.preparing
+            PreparationState.Preparing
         }
     }
     
     override fun nextBuffer(): Pair<MediaCodec.BufferInfo, ByteArray>? {
-        when(sources.count()) {
-            0 -> return null
-            else -> return buffers.poll()
+        return when(sources.count()) {
+            0 -> null
+            else -> buffers.poll()
         }
     }
 
@@ -92,7 +94,7 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
         if (sources.count() == 0) {
             currentFormat = node.getMediaFormat()
         } else if(!isSupportedFormat(node.getMediaFormat())) {
-            throw audio.AudioFormatException()
+            throw AudioFormatException()
         }
 
         node.callback = this

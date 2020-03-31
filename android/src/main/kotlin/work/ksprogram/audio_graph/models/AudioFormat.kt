@@ -1,4 +1,4 @@
-package models
+package work.ksprogram.audio_graph.models
 
 data class AudioFormat(
     val channels: Int,

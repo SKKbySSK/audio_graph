@@ -1,22 +1,22 @@
-package nodes
+package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import work.ksprogram.audio_graph.audio.*
 import java.util.*
 
-class AudioFilePlayerNode(id: Int, val path: String, val bufferDurationSeconds: Double = 0.2, val maximumBufferCount: Int = 5): AudioOutputNode(id), PlayableNode, PositionableNode, audio.AudioFileDecoderCallback, audio.BufferSinkCallback {
+class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double = 0.2, private val maximumBufferCount: Int = 5): AudioOutputNode(id), PlayableNode, PositionableNode, AudioFileDecoderCallback, BufferSinkCallback {
     companion object {
         const val nodeName = "audio_file_player_node"
     }
 
-    private var buffers: Queue<audio.AudioBuffer> = ArrayDeque()
+    private var buffers: Queue<AudioBuffer> = ArrayDeque()
     private var format: MediaFormat? = null
-    private var preparationState: PreparationState = PreparationState.none
-    private var bufferSink: audio.BufferSink
-    private val decoder: audio.AudioFileDecoder = audio.AudioFileDecoder(path, this)
+    private var preparationState: PreparationState = PreparationState.None
+    private var bufferSink: BufferSink
+    private val decoder: AudioFileDecoder = AudioFileDecoder(path, this)
 
-    var isPlaying = false
-        private set
+    private var isPlaying = false
 
     private var _posUs: Long = 0
     override var positionUs: Long
@@ -31,20 +31,20 @@ class AudioFilePlayerNode(id: Int, val path: String, val bufferDurationSeconds: 
 
     init {
         val bufferSize = decoder.bps.toDouble() / 8.0 * bufferDurationSeconds
-        bufferSink = audio.BufferSink(bufferSize.toInt(), decoder.bps, this)
+        bufferSink = BufferSink(bufferSize.toInt(), decoder.bps, this)
         decoder.beginDecoding()
     }
 
     override fun prepare() {
-        preparationState = PreparationState.preparing
+        preparationState = PreparationState.Preparing
     }
 
     override fun decoded(info: MediaCodec.BufferInfo, data: ByteArray) {
         val eos = info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
-        bufferSink.append(audio.AudioBuffer(info.presentationTimeUs, data, eos))
+        bufferSink.append(AudioBuffer(info.presentationTimeUs, data))
     }
     
-    override fun buffered(sink: audio.BufferSink, buffer: audio.AudioBuffer) {
+    override fun buffered(sink: BufferSink, buffer: AudioBuffer) {
         buffers.add(buffer)
         if (isPlaying) {
             callback?.bufferAvailable(this)
@@ -73,7 +73,7 @@ class AudioFilePlayerNode(id: Int, val path: String, val bufferDurationSeconds: 
     }
 
     override fun prepared() {
-        preparationState = PreparationState.prepared
+        preparationState = PreparationState.Prepared
         callback?.prepared(this)
     }
     
@@ -81,7 +81,7 @@ class AudioFilePlayerNode(id: Int, val path: String, val bufferDurationSeconds: 
         if (isPlaying) {
             val buffer = buffers.poll()
             if (buffer != null) {
-                audio.Volume.applyVolume(buffer.buffer, volume)
+                Volume.applyVolume(buffer.buffer, volume)
                 _posUs = buffer.timeUs
             }
 

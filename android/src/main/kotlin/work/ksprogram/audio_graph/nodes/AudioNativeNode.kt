@@ -1,12 +1,12 @@
-package nodes
+package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
 
 enum class PreparationState {
-    none,
-    preparing,
-    prepared,
+    None,
+    Preparing,
+    Prepared,
 }
 
 interface OutputNodeCallback {

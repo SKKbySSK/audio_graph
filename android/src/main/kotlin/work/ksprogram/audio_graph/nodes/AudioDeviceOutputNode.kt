@@ -1,14 +1,16 @@
-package nodes
+package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import work.ksprogram.audio_graph.audio.ManagedAudioTrack
+import work.ksprogram.audio_graph.audio.ManagedAudioTrackCallback
 
-class AudioDeviceOutputNode(id: Int) : AudioInputNode(id), AudioSingleInputNode, audio.ManagedAudioTrackCallback, OutputNodeCallback {
+class AudioDeviceOutputNode(id: Int) : AudioInputNode(id), AudioSingleInputNode, ManagedAudioTrackCallback, OutputNodeCallback {
     companion object {
         const val nodeName = "audio_device_output_node"
     }
 
-    private val audioTrack = audio.ManagedAudioTrack(this)
+    private val audioTrack = ManagedAudioTrack(this)
     private var lastFormat: MediaFormat? = null
     private var inputNode: AudioOutputNode? = null
 

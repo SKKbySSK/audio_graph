@@ -4,7 +4,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import nodes.*
+import work.ksprogram.audio_graph.audio.AudioException
+import work.ksprogram.audio_graph.models.AudioGraphModel
+import work.ksprogram.audio_graph.models.AudioNode
+import work.ksprogram.audio_graph.nodes.*
 import java.util.ArrayList
 
 class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallback {
@@ -20,9 +23,9 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
         when(call.method) {
             "build" -> {
                 val jsonGraphData = (call.arguments as ArrayList<Any>)[0] as String
-                val graphModel: models.AudioGraphModel = mapper.readValue(jsonGraphData)
+                val graphModel: AudioGraphModel = mapper.readValue(jsonGraphData)
 
-                var nodes: MutableList<AudioNativeNode> = mutableListOf()
+                val nodes: MutableList<AudioNativeNode> = mutableListOf()
                 for (node in graphModel.nodes) {
                     val nativeNode = when(node.name) {
                         AudioFilePlayerNode.nodeName -> AudioFilePlayerNode(node.id, node.parameters["path"] as String)
@@ -64,7 +67,7 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
                             singleInputNode.setInputNode(connection.outputNode!!)
                         }
                     }
-                } catch (ex: audio.AudioException) {
+                } catch (ex: AudioException) {
                     result.error(ex.errorCode, ex.message, null)
                     return
                 }
@@ -82,8 +85,8 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
         }
     }
     
-    fun getNode(pinId: Int, nodes: Iterable<models.AudioNode>, nativeNodes: Iterable<AudioNativeNode>): AudioNativeNode {
-        var pinParent: models.AudioNode? = null
+    private fun getNode(pinId: Int, nodes: Iterable<AudioNode>, nativeNodes: Iterable<AudioNativeNode>): AudioNativeNode {
+        var pinParent: AudioNode? = null
         for (node in nodes) {
             for (pin in node.inputs) {
                 if (pin.id == pinId) {

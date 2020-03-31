@@ -1,4 +1,4 @@
-package audio
+package work.ksprogram.audio_graph.audio
 
 import android.media.*
 
@@ -6,7 +6,7 @@ interface ManagedAudioTrackCallback {
     fun readyToPlay()
 }
 
-class ManagedAudioTrack(val callback: audio.ManagedAudioTrackCallback, val bufferDuration: Int = 5) {
+class ManagedAudioTrack(private val callback: ManagedAudioTrackCallback, private val bufferDuration: Int = 5) {
     private var track: AudioTrack? = null
     private var format: AudioFormat? = null
     private var minimumBytes: Int = 0

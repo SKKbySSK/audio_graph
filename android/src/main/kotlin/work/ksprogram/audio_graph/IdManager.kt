@@ -1,6 +1,6 @@
 package work.ksprogram.audio_graph
 
-class IdManager(val key: String) {
+class IdManager(private val key: String) {
     companion object {
         private val ids: MutableMap<String, Int> = mutableMapOf()
 

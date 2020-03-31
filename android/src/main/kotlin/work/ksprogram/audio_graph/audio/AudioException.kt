@@ -1,5 +1,5 @@
-package audio
+package work.ksprogram.audio_graph.audio
 
 open class AudioException(val errorCode: String, message: String): Exception(message)
 
-class AudioFormatException(message: String = "Invalid format error") : audio.AudioException("ERR_FORMAT", message)
+class AudioFormatException(message: String = "Invalid format error") : AudioException("ERR_FORMAT", message)

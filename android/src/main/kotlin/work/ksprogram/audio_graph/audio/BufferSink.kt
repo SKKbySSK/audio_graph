@@ -1,15 +1,15 @@
-package work.ksprogram.audio_graph.audio
+package audio
 
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 interface BufferSinkCallback {
-    fun buffered(sink: work.ksprogram.audio_graph.audio.BufferSink, buffer: work.ksprogram.audio_graph.audio.AudioBuffer)
+    fun buffered(sink: audio.BufferSink, buffer: audio.AudioBuffer)
 }
 
-class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio_graph.audio.BufferSinkCallback) {
-    private var currentBuffer: work.ksprogram.audio_graph.audio.AudioBuffer? = null
+class BufferSink(val size: Int, val bps: Int, val callback: audio.BufferSinkCallback) {
+    private var currentBuffer: audio.AudioBuffer? = null
     private val leftOvers: ArrayDeque<Byte> = ArrayDeque()
     private var index: Int = 0
     private var totalWrite: Int = 0
@@ -41,16 +41,16 @@ class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio
     }
 
     // TODO: handle end of stream (last buffer won't be passed to the callback)
-    fun append(buffer: work.ksprogram.audio_graph.audio.AudioBuffer) {
+    fun append(buffer: audio.AudioBuffer) {
         lock.withLock {
             appendInternal(buffer)
         }
     }
 
-    private fun appendInternal(buffer: work.ksprogram.audio_graph.audio.AudioBuffer) {
+    private fun appendInternal(buffer: audio.AudioBuffer) {
         var fill = Math.min(size - index, leftOvers.count())
 
-        val currentBuffer: work.ksprogram.audio_graph.audio.AudioBuffer
+        val currentBuffer: audio.AudioBuffer
         if (this.currentBuffer == null) {
             val timeUs: Long
             if (leftOvers.count() > 0) {
@@ -60,7 +60,7 @@ class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio
                 timeUs = buffer.timeUs
             }
 
-            currentBuffer = work.ksprogram.audio_graph.audio.AudioBuffer(timeUs, ByteArray(size))
+            currentBuffer = audio.AudioBuffer(timeUs, ByteArray(size))
             this.currentBuffer = currentBuffer
 
         } else {

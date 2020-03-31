@@ -1,18 +1,20 @@
 package work.ksprogram.audio_graph
 
+import nodes.AudioNativeNode
+
 interface AudioGraphCallback {
     fun prepareToPlay()
 }
 
-class AudioGraph(val nodes: Iterable<work.ksprogram.audio_graph.models.AudioNode>, val nativeNodes: Iterable<work.ksprogram.audio_graph.nodes.AudioNativeNode>, val connections: Iterable<work.ksprogram.audio_graph.nodes.AudioNodeConnection>) {
+class AudioGraph(val nodes: Iterable<AudioNativeNode>) {
     companion object {
-        val graphs: MutableMap<Int, work.ksprogram.audio_graph.AudioGraph> = mutableMapOf()
-        val id = work.ksprogram.audio_graph.IdManager("AudioGraph")
+        val graphs: MutableMap<Int, AudioGraph> = mutableMapOf()
+        val id = IdManager("AudioGraph")
     }
     
     fun dispose() {
-        for (node in nativeNodes) {
-            work.ksprogram.audio_graph.nodes.AudioNativeNode.nodes.remove(node.id)?.dispose()
+        for (node in nodes) {
+            AudioNativeNode.nodes.remove(node.id)?.dispose()
         }
     }
 }

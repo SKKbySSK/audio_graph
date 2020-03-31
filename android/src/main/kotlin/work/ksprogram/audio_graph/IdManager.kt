@@ -5,13 +5,13 @@ class IdManager(val key: String) {
         private val ids: MutableMap<String, Int> = mutableMapOf()
 
         fun generateId(key: String): Int {
-            val id = work.ksprogram.audio_graph.IdManager.Companion.ids[key] ?: 0
-            work.ksprogram.audio_graph.IdManager.Companion.ids[key] = id + 1
+            val id = ids[key] ?: 0
+            ids[key] = id + 1
             return id
         }
     }
 
     fun generateId(): Int {
-        return work.ksprogram.audio_graph.IdManager.Companion.generateId(key)
+        return generateId(key)
     }
 }

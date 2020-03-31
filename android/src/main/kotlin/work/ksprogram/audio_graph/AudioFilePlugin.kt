@@ -29,7 +29,7 @@ class AudioFilePlugin: MethodChannel.MethodCallHandler {
                 val format = extractor.getTrackFormat(0)
                 val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
                 val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-                val json = mapper.writeValueAsString(work.ksprogram.audio_graph.models.AudioFormat(channels, sampleRate))
+                val json = mapper.writeValueAsString(models.AudioFormat(channels, sampleRate))
                 result.success(json)
             }
         }

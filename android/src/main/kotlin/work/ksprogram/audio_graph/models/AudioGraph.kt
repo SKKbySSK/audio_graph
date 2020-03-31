@@ -1,6 +1,6 @@
-package work.ksprogram.audio_graph.models
+package models
 
 data class AudioGraphModel (
         val connections: Map<String, Int>,
-        val nodes: List<work.ksprogram.audio_graph.models.AudioNode>
+        val nodes: List<models.AudioNode>
 )

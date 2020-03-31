@@ -1,6 +1,6 @@
-package work.ksprogram.audio_graph.models
+package models
 
 data class OutputPin(
-        val format: work.ksprogram.audio_graph.models.AudioFormat,
+        val format: models.AudioFormat,
         val id: Int
 )

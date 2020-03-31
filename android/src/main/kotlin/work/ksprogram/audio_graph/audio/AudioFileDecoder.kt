@@ -1,4 +1,4 @@
-package work.ksprogram.audio_graph.audio
+package audio
 
 import android.media.*
 import java.lang.Exception
@@ -18,7 +18,7 @@ interface AudioFileDecoderCallback {
 
 // https://github.com/taehwandev/MediaCodecExample/blob/master/src/net/thdev/mediacodecexample/decoder/AudioDecoderThread.java
 // https://github.com/mafshin/MediaCodecDemo/blob/master/src/io/vec/demo/mediacodec/DecodeActivity.java
-class AudioFileDecoder(val path: String, val callback: work.ksprogram.audio_graph.audio.AudioFileDecoderCallback, val timeoutUs: Long = 1000) {
+class AudioFileDecoder(val path: String, val callback: audio.AudioFileDecoderCallback, val timeoutUs: Long = 1000) {
     private var mediaCodec: MediaCodec
     private val mediaExtractor: MediaExtractor
     private var bufferIndex: Int = 0

@@ -1,20 +1,16 @@
-package work.ksprogram.audio_graph.nodes
+package nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
 
-class AudioDeviceOutputNode(id: Int) : work.ksprogram.audio_graph.nodes.AudioInputNode(id), work.ksprogram.audio_graph.nodes.AudioSingleInputNode, work.ksprogram.audio_graph.audio.ManagedAudioTrackCallback, work.ksprogram.audio_graph.nodes.OutputNodeCallback {
+class AudioDeviceOutputNode(id: Int) : AudioInputNode(id), AudioSingleInputNode, audio.ManagedAudioTrackCallback, OutputNodeCallback {
     companion object {
         const val nodeName = "audio_device_output_node"
     }
 
-    private val audioTrack: work.ksprogram.audio_graph.audio.ManagedAudioTrack
+    private val audioTrack = audio.ManagedAudioTrack(this)
     private var lastFormat: MediaFormat? = null
-    private var inputNode: work.ksprogram.audio_graph.nodes.AudioOutputNode? = null
-
-    init {
-        audioTrack = work.ksprogram.audio_graph.audio.ManagedAudioTrack(this)
-    }
+    private var inputNode: AudioOutputNode? = null
 
     override fun readyToPlay() {
         audioTrack.play()
@@ -29,17 +25,17 @@ class AudioDeviceOutputNode(id: Int) : work.ksprogram.audio_graph.nodes.AudioInp
         audioTrack.write(info, buffer)
     }
 
-    override fun setInputNode(node: work.ksprogram.audio_graph.nodes.AudioOutputNode) {
+    override fun setInputNode(node: AudioOutputNode) {
         inputNode?.callback = null
         node.callback = this
         inputNode = node
     }
 
-    override fun prepared(node: work.ksprogram.audio_graph.nodes.AudioOutputNode) {
+    override fun prepared(node: AudioOutputNode) {
 
     }
 
-    override fun bufferAvailable(node: work.ksprogram.audio_graph.nodes.AudioOutputNode) {
+    override fun bufferAvailable(node: AudioOutputNode) {
         val buffer = node.nextBuffer()!!
         val format = node.getMediaFormat()
 

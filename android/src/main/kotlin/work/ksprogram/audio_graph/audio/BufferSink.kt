@@ -3,13 +3,14 @@ package work.ksprogram.audio_graph.audio
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.min
 
 interface BufferSinkCallback {
-    fun buffered(sink: work.ksprogram.audio_graph.audio.BufferSink, buffer: work.ksprogram.audio_graph.audio.AudioBuffer)
+    fun buffered(sink: BufferSink, buffer: AudioBuffer)
 }
 
-class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio_graph.audio.BufferSinkCallback) {
-    private var currentBuffer: work.ksprogram.audio_graph.audio.AudioBuffer? = null
+class BufferSink(private val size: Int, bps: Int, private val callback: BufferSinkCallback) {
+    private var currentBuffer: AudioBuffer? = null
     private val leftOvers: ArrayDeque<Byte> = ArrayDeque()
     private var index: Int = 0
     private var totalWrite: Int = 0
@@ -36,31 +37,27 @@ class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio
         }
     }
 
-    fun ignore(count: Long) {
-        ignoreCount += count
-    }
-
     // TODO: handle end of stream (last buffer won't be passed to the callback)
-    fun append(buffer: work.ksprogram.audio_graph.audio.AudioBuffer) {
+    fun append(buffer: AudioBuffer) {
         lock.withLock {
             appendInternal(buffer)
         }
     }
 
-    private fun appendInternal(buffer: work.ksprogram.audio_graph.audio.AudioBuffer) {
-        var fill = Math.min(size - index, leftOvers.count())
+    private fun appendInternal(buffer: AudioBuffer) {
+        var fill = min(size - index, leftOvers.count())
 
-        val currentBuffer: work.ksprogram.audio_graph.audio.AudioBuffer
+        val currentBuffer: AudioBuffer
         if (this.currentBuffer == null) {
             val timeUs: Long
-            if (leftOvers.count() > 0) {
+            timeUs = if (leftOvers.count() > 0) {
                 val delta = fill * bpus
-                timeUs = buffer.timeUs - delta.toLong()
+                buffer.timeUs - delta.toLong()
             } else {
-                timeUs = buffer.timeUs
+                buffer.timeUs
             }
 
-            currentBuffer = work.ksprogram.audio_graph.audio.AudioBuffer(timeUs, ByteArray(size))
+            currentBuffer = AudioBuffer(timeUs, ByteArray(size))
             this.currentBuffer = currentBuffer
 
         } else {
@@ -78,7 +75,7 @@ class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio
         }
         totalWrite += fill
 
-        fill = Math.min(currentBuffer.buffer.size - index, buffer.buffer.size)
+        fill = min(currentBuffer.buffer.size - index, buffer.buffer.size)
 
         for (i in buffer.buffer.indices) {
             if (ignoreCount > 0) {
@@ -102,10 +99,7 @@ class BufferSink(val size: Int, val bps: Int, val callback: work.ksprogram.audio
     }
 
     fun flush() {
-        val buffer = currentBuffer
-        if (buffer == null) {
-            return
-        }
+        val buffer = currentBuffer ?: return
         callback.buffered(this, buffer)
         this.currentBuffer = null
         index = 0

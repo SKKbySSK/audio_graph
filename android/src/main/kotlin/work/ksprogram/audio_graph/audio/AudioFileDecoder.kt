@@ -18,9 +18,9 @@ interface AudioFileDecoderCallback {
 
 // https://github.com/taehwandev/MediaCodecExample/blob/master/src/net/thdev/mediacodecexample/decoder/AudioDecoderThread.java
 // https://github.com/mafshin/MediaCodecDemo/blob/master/src/io/vec/demo/mediacodec/DecodeActivity.java
-class AudioFileDecoder(val path: String, val callback: work.ksprogram.audio_graph.audio.AudioFileDecoderCallback, val timeoutUs: Long = 1000) {
+class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallback, private val timeoutUs: Long = 1000) {
     private var mediaCodec: MediaCodec
-    private val mediaExtractor: MediaExtractor
+    private val mediaExtractor = MediaExtractor()
     private var bufferIndex: Int = 0
     private val decoder: Runnable
     private var decoderThread: Thread
@@ -29,17 +29,15 @@ class AudioFileDecoder(val path: String, val callback: work.ksprogram.audio_grap
     private var lastFormat: MediaFormat? = null
     private var seeked = false
     private var lastOffset: Long = 0
-    private var startMs: Long = 0
     private val lock = ReentrantLock()
     private var paused = false
     private var needsRestart = false
 
     val format: MediaFormat
-    val bitRate: Int
+    private val bitRate: Int
     var bps: Int //bits per second
 
     init {
-        mediaExtractor = MediaExtractor()
         mediaExtractor.setDataSource(path)
         mediaExtractor.selectTrack(0)
         format = mediaExtractor.getTrackFormat(0)
@@ -81,12 +79,9 @@ class AudioFileDecoder(val path: String, val callback: work.ksprogram.audio_grap
         }
 
         lastOffset = mediaExtractor.sampleTime / 1000
-        startMs = System.currentTimeMillis()
     }
 
     private fun decode() {
-        startMs = System.currentTimeMillis()
-
         while (!disposed) {
             try {
                 if (paused) {

@@ -1,6 +1,6 @@
 /// IdManager is used by internal classes
 class IdManager {
-  static Map<String, int> _counter = Map();
+  static final _counter = <String, int>{};
 
   static int generate(String key) {
     if (!_counter.containsKey(key)) {

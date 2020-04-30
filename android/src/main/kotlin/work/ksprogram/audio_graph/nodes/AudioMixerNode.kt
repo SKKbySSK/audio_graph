@@ -24,16 +24,22 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
             if (buffers.count() > 0) {
                 val minPair = buffers.minBy { it.second.size }!!
                 val size = minPair.second.size
-                val buf = Array(size) { i ->
-                    var result = 0
+                val buf = ByteArray(size)
+                var sum: Int
+                for (i in 0..(size - 1)) {
+                    sum = 0
                     for (b in buffers) {
-                        result += b.second[i]
+                        sum += b.second[i]
                     }
-                    
-                    result /= length
-                    
-                    return@Array result.toByte()
-                }.toByteArray()
+
+                    if (sum > Byte.MAX_VALUE) {
+                        buf[i] = Byte.MAX_VALUE
+                    } else if (sum < Byte.MIN_VALUE) {
+                        buf[i] = Byte.MIN_VALUE
+                    } else {
+                        buf[i] = sum.toByte()
+                    }
+                }
 
                 Volume.applyVolume(buf, volume)
 

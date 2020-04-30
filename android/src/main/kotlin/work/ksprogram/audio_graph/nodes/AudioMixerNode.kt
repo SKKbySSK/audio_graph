@@ -19,14 +19,13 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
     private fun mixingThread() {
         while (bufferAvailable() && !isDisposed) {
             val buffers = sources.mapNotNull { it.nextBuffer() }
-            val length = this.sources.count()
 
             if (buffers.count() > 0) {
                 val minPair = buffers.minBy { it.second.size }!!
                 val size = minPair.second.size
                 val buf = ByteArray(size)
                 var sum: Int
-                for (i in 0..(size - 1)) {
+                for (i in 0 until size) {
                     sum = 0
                     for (b in buffers) {
                         sum += b.second[i]

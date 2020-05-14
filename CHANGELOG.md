@@ -1,3 +1,6 @@
+## 0.0.6
+- Update audio mixing algorithm on Android (#10)
+
 ## 0.0.5
 - Add API documentations
 - Provide more description of this plugin

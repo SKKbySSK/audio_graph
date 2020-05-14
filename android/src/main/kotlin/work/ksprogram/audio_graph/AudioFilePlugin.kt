@@ -5,6 +5,7 @@ import android.media.MediaFormat
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import work.ksprogram.audio_graph.models.AudioFormat
 import java.util.ArrayList
 
 class AudioFilePlugin: MethodChannel.MethodCallHandler {
@@ -29,7 +30,7 @@ class AudioFilePlugin: MethodChannel.MethodCallHandler {
                 val format = extractor.getTrackFormat(0)
                 val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
                 val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-                val json = mapper.writeValueAsString(work.ksprogram.audio_graph.models.AudioFormat(channels, sampleRate))
+                val json = mapper.writeValueAsString(AudioFormat(channels, sampleRate))
                 result.success(json)
             }
         }

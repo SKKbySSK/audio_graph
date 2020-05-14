@@ -1,6 +1,6 @@
 name: audio_graph
 description: Highly customizable audio playback plugin for flutter ios/android. For more details, see the README
-version: 0.0.5
+version: 0.0.6
 homepage: https://github.com/SKKbySSK/audio_graph
 
 environment:
@@ -13,6 +13,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  pedantic_mono: ^1.8.0
 
 flutter:
   plugin:

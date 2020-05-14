@@ -7,18 +7,20 @@ import 'package:audio_graph/pins/pins.dart';
 import 'package:flutter/services.dart';
 
 /// AudioGraphBuilder will build the AudioGraph
-/// Add AudioNodes to AudioGraphBuilder.nodes and connect these pins. Then call AudioGraphBuilder.build()
+/// Add AudioNodes to nodes property and connect pins. Then call build()
 class AudioGraphBuilder {
   static const MethodChannel _channel =
-      MethodChannel("audio_graph/graph_builder");
+      MethodChannel('audio_graph/graph_builder');
 
   /// AudioNodes used by AudioGraph
-  List<AudioNode> nodes = List();
-  Map<OutputPin, InputPin> _connections = Map();
+  final List<AudioNode> nodes = <AudioNode>[];
+  final _connections = <OutputPin, InputPin>{};
 
   /// Connect the output pin to input pin
   void connect(OutputPin output, InputPin input) {
-    assert(input.format == AudioFormat.any() || output.format == input.format);
+    if (input.format != const AudioFormat.any()) {
+      assert(output.format == input.format);
+    }
     _connections[output] = input;
   }
 
@@ -30,17 +32,17 @@ class AudioGraphBuilder {
   /// Build the AudioGraph if the connection is valid
   /// If it is not valid state, Exception will be thrown
   Future<AudioGraph> build() async {
-    Map<String, int> connections = Map();
-    for (var out in _connections.keys) {
+    final connections = <String, int>{};
+    for (final out in _connections.keys) {
       connections[out.id.toString()] = _connections[out].id;
     }
 
     final jsonGraph = jsonEncode({
-      "connections": connections,
-      "nodes": nodes,
+      'connections': connections,
+      'nodes': nodes,
     });
 
-    final id = await _channel.invokeMethod('build', [jsonGraph]);
+    final id = await _channel.invokeMethod<int>('build', [jsonGraph]);
     if (id != null) {
       return AudioGraph(id);
     }

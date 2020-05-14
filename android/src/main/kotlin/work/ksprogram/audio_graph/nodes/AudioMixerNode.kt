@@ -3,6 +3,7 @@ package work.ksprogram.audio_graph.nodes
 import android.media.MediaCodec
 import android.media.MediaFormat
 import work.ksprogram.audio_graph.audio.AudioFormatException
+import work.ksprogram.audio_graph.audio.AudioMixer
 import work.ksprogram.audio_graph.audio.Volume
 import java.util.*
 
@@ -15,29 +16,24 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
     private var thread: Thread? = null
     private val sources: MutableList<AudioOutputNode> = mutableListOf()
     private var currentFormat: MediaFormat? = null
+    private var timeUs: Long = 0
 
     private fun mixingThread() {
         while (bufferAvailable() && !isDisposed) {
             val buffers = sources.mapNotNull { it.nextBuffer() }
-            val length = this.sources.count()
+            val format = currentFormat
 
-            if (buffers.count() > 0) {
-                val minPair = buffers.minBy { it.second.size }!!
-                val size = minPair.second.size
-                val buf = Array(size) { i ->
-                    var result = 0
-                    for (b in buffers) {
-                        result += b.second[i]
-                    }
-                    
-                    result /= length
-                    
-                    return@Array result.toByte()
-                }.toByteArray()
+            if (buffers.count() > 0 && format != null) {
+                val bytesPerSec = format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+                val buf = AudioMixer.mixInterleaved(buffers.map { it.second })
+                val info = MediaCodec.BufferInfo()
+                info.set(0, buf.size, timeUs, 0)
+                val deltaTime = buf.size / bytesPerSec.toDouble()
+                timeUs += (deltaTime * 10e6).toLong()
 
                 Volume.applyVolume(buf, volume)
 
-                this.buffers.add(Pair(minPair.first, buf))
+                this.buffers.add(Pair(info, buf))
                 callback?.bufferAvailable(this)
             }
         }

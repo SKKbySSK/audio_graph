@@ -1,5 +1,5 @@
 PODS:
-  - audio_graph (0.0.5):
+  - audio_graph (0.0.6):
     - Flutter
   - Flutter (1.0.0)
   - path_provider (0.0.1):

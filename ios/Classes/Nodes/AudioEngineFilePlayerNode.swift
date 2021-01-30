@@ -29,7 +29,7 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
       return offset + (Double(time.sampleTime) / time.sampleRate)
     }
     set {
-      guard let playing = playing else {
+      guard let media = currentMedia else {
         lastPosition = newValue
         return
       }
@@ -39,14 +39,14 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
       
       ignoreCompletion = true
       playerNode.stop()
-      let startSample = max(Int64(floor(newValue * playing.file.processingFormat.sampleRate)), 0)
-      let frameCount = max(UInt32(playing.file.length - startSample), 0)
+      let startSample = max(Int64(floor(newValue * media.file.processingFormat.sampleRate)), 0)
+      let frameCount = max(UInt32(media.file.length - startSample), 0)
       
       guard frameCount != 0 else {
         ignoreCompletion = false
         return
       }
-      playerNode.scheduleSegment(playing.file, startingFrame: startSample, frameCount: frameCount, at: nil, completionHandler: completionHandler)
+      playerNode.scheduleSegment(media.file, startingFrame: startSample, frameCount: frameCount, at: nil, completionHandler: completionHandler)
       ignoreCompletion = false
       
       if isPlaying {
@@ -69,7 +69,7 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
   }
   
   private let playerNode: AVAudioPlayerNode
-  private var playing: (urL: URL, file: AVAudioFile)?
+  private var currentMedia: (urL: URL, file: AVAudioFile)?
   
   init(_ node: AudioNode, inputConnections: [AudioNodeConnection], outputConnections: [AudioNodeConnection]) throws {
     guard node.name == AudioEngineFilePlayerNode.nodeName else { throw NSError() }
@@ -88,14 +88,15 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
     guard !ignoreCompletion else {
       return
     }
-    pause()
+    lastPosition = position
+    playerNode.pause()
   }
   
   func prepare() {
     let url = URL(fileURLWithPath: node.parameters["path"]!)
     
     let file = try! AVAudioFile(forReading: url)
-    playing = (url, file)
+    currentMedia = (url, file)
     position = lastPosition // This will reschedule automatically
     isPrepared = true
   }

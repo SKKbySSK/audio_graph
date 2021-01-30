@@ -1,4 +1,4 @@
-group 'com.example.audio_graph'
+group 'work.ksprogram.audio_graph'
 version '1.0-SNAPSHOT'
 
 buildscript {
@@ -25,20 +25,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
         minSdkVersion 21
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
         disable 'InvalidPackage'
-    }
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

@@ -50,7 +50,7 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
         val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
         bps = sampleRate * channels * bitRate
         
-        val codec = MediaCodecList(MediaCodecList.REGULAR_CODECS).findDecoderForFormat(format)
+        val codec = MediaCodecList(MediaCodecList.ALL_CODECS).findDecoderForFormat(format)
         val mediaCodec = MediaCodec.createByCodecName(codec)
         mediaCodec.configure(format, null, null, 0)
         mediaCodec.start()

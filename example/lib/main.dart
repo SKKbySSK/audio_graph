@@ -1,13 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:audio_graph/audio_graph.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -53,6 +52,8 @@ class _MyAppState extends State<MyApp> {
     // You should add these files to example/assets/ folder to test in your local workspace
     final assetFiles = [
       "test1.mp3",
+      "test2.mp3",
+      "test3.mp3",
     ];
 
     for (final asset in assetFiles) {

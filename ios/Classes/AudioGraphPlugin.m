@@ -10,7 +10,6 @@
 
 @implementation AudioGraphPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    [PluginRegistrar registerWithRegistrar:registrar];
+  [SwiftAudioGraphPlugin registerWithRegistrar:registrar];
 }
 @end
-

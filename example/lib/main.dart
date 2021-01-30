@@ -52,9 +52,7 @@ class _MyAppState extends State<MyApp> {
     // Create AudioFilePlayerNodes from assets
     // You should add these files to example/assets/ folder to test in your local workspace
     final assetFiles = [
-      "test1.mp3",
-      "test2.mp3",
-      "test3.mp3",
+      "test1.m4a",
     ];
 
     for (final asset in assetFiles) {

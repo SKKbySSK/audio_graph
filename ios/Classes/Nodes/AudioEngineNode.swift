@@ -9,35 +9,35 @@ import Foundation
 import AVFoundation
 
 protocol AudioEngineNode: class {
-    static var nodeName: String { get }
-    
-    var node: AudioNode { get }
-    var engineNode: AVAudioNode { get }
-    var inputConnections: [AudioNodeConnection] { get }
-    var outputConnections: [AudioNodeConnection] { get }
-    var shouldAttach: Bool { get }
-    
-    func dispose()
+  static var nodeName: String { get }
+  
+  var node: AudioNode { get }
+  var engineNode: AVAudioNode { get }
+  var inputConnections: [AudioNodeConnection] { get }
+  var outputConnections: [AudioNodeConnection] { get }
+  var shouldAttach: Bool { get }
+  
+  func dispose()
 }
 
 extension AudioEngineNode {
-    func dispose() {
-    }
+  func dispose() {
+  }
 }
 
 protocol AudioControllableNode: class {
-    func play()
-    func pause()
+  func play()
+  func pause()
 }
 
 protocol AudioPreparableNode: class {
-    func prepare()
+  func prepare()
 }
 
 protocol AudioVolumeEditableNode: class {
-    var volume: Double { get set }
+  var volume: Double { get set }
 }
 
 protocol AudioPositionableNode: class {
-    var position: Double { get set }
+  var position: Double { get set }
 }

@@ -9,13 +9,13 @@ import Foundation
 import AVFoundation
 
 class AudioNodeConnection {
-    init(outPin: Int, inPin: Int) {
-        self.outPin = outPin
-        self.inPin = inPin
-    }
-    
-    let outPin: Int
-    let inPin: Int
-    var outBus: AVAudioNodeBus?
-    var inBus: AVAudioNodeBus?
+  init(outPin: Int, inPin: Int) {
+    self.outPin = outPin
+    self.inPin = inPin
+  }
+  
+  let outPin: Int
+  let inPin: Int
+  var outBus: AVAudioNodeBus?
+  var inBus: AVAudioNodeBus?
 }

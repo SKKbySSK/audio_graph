@@ -89,8 +89,11 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
     override fun addInputNode(node: AudioOutputNode) {
         if (sources.count() == 0) {
             currentFormat = node.getMediaFormat()
-        } else if(!isSupportedFormat(node.getMediaFormat())) {
-            throw AudioFormatException()
+        }
+
+        val nodeFormat = node.getMediaFormat()
+        if (!isSupportedFormat(nodeFormat)) {
+            throw AudioFormatException("Could not mix different format nodes(Expected: ${formatAudioFormatString(currentFormat!!)}, Actual: ${formatAudioFormatString(nodeFormat)})")
         }
 
         node.callback = this
@@ -109,10 +112,27 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
     private fun isSupportedFormat(format: MediaFormat): Boolean {
         val current = currentFormat ?: return true
 
+        val bitRate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            format.getInteger(MediaFormat.KEY_PCM_ENCODING) == current.getInteger(MediaFormat.KEY_PCM_ENCODING)
+        } else {
+            true
+        }
+
         val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE) == current.getInteger(MediaFormat.KEY_SAMPLE_RATE)
         val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) == current.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
 
-        return sampleRate && channels
+        return bitRate && sampleRate && channels
+    }
+
+    private fun formatAudioFormatString(format: MediaFormat): String {
+        val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+        val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            val bitRate = format.getInteger(MediaFormat.KEY_PCM_ENCODING) * 8
+            return "${sampleRate}Hz, ${channels}ch, ${bitRate}bits"
+        } else {
+            return "${sampleRate}Hz, ${channels}ch"
+        }
     }
 
     override fun dispose() {

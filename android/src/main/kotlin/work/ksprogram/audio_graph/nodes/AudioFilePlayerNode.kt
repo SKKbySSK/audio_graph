@@ -2,6 +2,7 @@ package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import android.util.Log
 import work.ksprogram.audio_graph.audio.*
 import java.util.*
 
@@ -30,8 +31,8 @@ class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double =
         }
 
     init {
-        val bufferSize = decoder.bps.toDouble() / 8.0 * bufferDurationSeconds
-        bufferSink = BufferSink(bufferSize.toInt(), decoder.bps, this)
+        val bufferSize = decoder.bitsPerSecond.toDouble() / 8.0 * bufferDurationSeconds
+        bufferSink = BufferSink(bufferSize.toInt(), decoder.bitsPerSecond, this)
         decoder.beginDecoding()
     }
 
@@ -59,23 +60,24 @@ class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double =
     }
 
     override fun outputFormatChanged(format: MediaFormat, lastFormat: MediaFormat?) {
+        if (preparationState != PreparationState.Prepared) {
+            preparationState = PreparationState.Prepared
+            callback?.prepared(this)
+        }
+
         if (lastFormat != null) {
             val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE) != format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
             val channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT) != format.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
 
             if (sampleRate || channels) {
-                println("unsupported format changing")
+                Log.w("AudioFilePlayerNode", "Output format changed unexpectedly. This will cause undefined behavior")
             }
         }
 
-        bufferSink.setFormat(decoder.bps)
+        bufferSink.setFormat(decoder.bitsPerSecond)
         this.format = format
     }
 
-    override fun prepared() {
-        preparationState = PreparationState.Prepared
-        callback?.prepared(this)
-    }
     
     override fun nextBuffer(): Pair<MediaCodec.BufferInfo, ByteArray>? {
         if (isPlaying) {

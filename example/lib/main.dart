@@ -63,12 +63,7 @@ class _MyAppState extends State<MyApp> {
 
     // AudioDeviceOutputNode is an output node to produce audio data to the speaker.
     final output = AudioDeviceOutputNode();
-
-    // When all players and output node is prepared, set AudioMixerNode and rebuild UI.
-    setState(() {
-      mixer = AudioMixerNode();
-      this.files = files;
-    });
+    mixer = AudioMixerNode();
 
     // Add player, mixer, output nodes to the AudioGraphBuilder
     final builder = AudioGraphBuilder();
@@ -91,7 +86,13 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException catch (e) {
       print(e.code);
       print(e.message);
+      return;
     }
+
+    // When the graph is ready, set files and rebuild UI.
+    setState(() {
+      this.files = files;
+    });
 
     Timer.periodic(Duration(milliseconds: 200), (timer) async {
       if (ignoreUpdate) {

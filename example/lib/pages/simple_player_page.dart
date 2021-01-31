@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:audio_graph/audio_graph.dart';
 import 'package:audio_graph_example/asset_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:audio_graph/audio_graph.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
@@ -97,7 +97,7 @@ class _SimplePlayerPageState extends State<SimplePlayerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mixer Demo'),
+        title: const Text('Simple Player Demo'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),

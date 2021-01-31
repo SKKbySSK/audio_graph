@@ -11,6 +11,7 @@ class ManagedAudioTrack(private val callback: ManagedAudioTrackCallback, private
     private var format: AudioFormat? = null
     private var minimumBytes: Int = 0
     private var bytesWritten: Int = 0
+    private var useShortArray = true
     private var ready = false
 
     fun outputFormatChanged(format: MediaFormat, lastFormat: MediaFormat?) {
@@ -20,7 +21,8 @@ class ManagedAudioTrack(private val callback: ManagedAudioTrackCallback, private
             val sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
             val audio = AudioFormat.Builder().setSampleRate(sampleRate).setEncoding(AudioFormat.ENCODING_PCM_16BIT).setChannelMask(AudioFormat.CHANNEL_OUT_STEREO).build()
 
-            val size = AudioTrack.getMinBufferSize(audio.sampleRate, audio.channelMask, AudioFormat.ENCODING_PCM_16BIT)
+            val size = AudioTrack.getMinBufferSize(audio.sampleRate, audio.channelMask, audio.encoding)
+            useShortArray = (audio.encoding == AudioFormat.ENCODING_PCM_16BIT)
 
             this.format = audio
             track = AudioTrack(attrs, audio, size, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE)
@@ -32,16 +34,25 @@ class ManagedAudioTrack(private val callback: ManagedAudioTrackCallback, private
     }
 
     fun write(info: MediaCodec.BufferInfo, data: ByteArray) {
-        val write = track!!.write(data, info.offset, info.offset + info.size)
-        if (write >= 0) {
+        val writeResult = if (useShortArray) {
+            val shortData = ShortArray(data.size / 2) {
+                (data[it * 2] + (data[(it * 2) + 1].toInt() shl 8)).toShort()
+            }
+            track!!.write(shortData, info.offset / 2, info.size / 2)
+        } else {
+            track!!.write(data, info.offset, info.size)
+        }
+
+        if (writeResult >= 0) {
             if (ready) return
-            bytesWritten += data.size
-            if (bytesWritten > minimumBytes) {
+            bytesWritten += info.size
+
+            if (bytesWritten >= minimumBytes) {
                 ready = true
                 callback.readyToPlay()
             }
         } else {
-            println("Error : $write")
+            println("Error : $writeResult")
         }
     }
 

@@ -2,6 +2,7 @@ package work.ksprogram.audio_graph.nodes
 
 import android.media.MediaCodec
 import android.media.MediaFormat
+import android.util.Log
 import work.ksprogram.audio_graph.audio.ManagedAudioTrack
 import work.ksprogram.audio_graph.audio.ManagedAudioTrackCallback
 
@@ -42,6 +43,10 @@ class AudioDeviceOutputNode(id: Int) : AudioInputNode(id), AudioSingleInputNode,
         val format = node.getMediaFormat()
 
         write(format, buffer.first, buffer.second)
+    }
+
+    override fun discardBuffer(node: AudioOutputNode) {
+        audioTrack.discardBuffer()
     }
 
     override fun dispose() {

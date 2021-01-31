@@ -12,10 +12,8 @@ interface BufferSinkCallback {
 class BufferSink(private val size: Int, bps: Int, private val callback: BufferSinkCallback) {
     private var currentBuffer: AudioBuffer? = null
     private val leftOvers: ArrayDeque<Byte> = ArrayDeque()
-    private var index: Int = 0
-    private var totalWrite: Int = 0
+    private var fillOffset: Int = 0
     private var bpus: Double // bytes per microsec
-    private var ignoreCount: Long = 0
     private val lock = ReentrantLock()
 
     init {
@@ -32,8 +30,6 @@ class BufferSink(private val size: Int, bps: Int, private val callback: BufferSi
         lock.withLock {
             leftOvers.clear()
             currentBuffer = null
-            totalWrite = 0
-            ignoreCount = 0
         }
     }
 
@@ -45,8 +41,9 @@ class BufferSink(private val size: Int, bps: Int, private val callback: BufferSi
     }
 
     private fun appendInternal(buffer: AudioBuffer) {
-        var fill = min(size - index, leftOvers.count())
+        var fill = min(size - fillOffset, leftOvers.count())
 
+        // Generate or get next audio buffer
         val currentBuffer: AudioBuffer
         if (this.currentBuffer == null) {
             val timeUs: Long
@@ -59,42 +56,29 @@ class BufferSink(private val size: Int, bps: Int, private val callback: BufferSi
 
             currentBuffer = AudioBuffer(timeUs, ByteArray(size))
             this.currentBuffer = currentBuffer
-
         } else {
             currentBuffer = this.currentBuffer!!
         }
 
+        // fill the audio buffer with the last left overs
         for (i in 0 until fill) {
-            if (ignoreCount > 0) {
-                ignoreCount--
-                continue
-            }
-
-            currentBuffer.buffer[index++] = leftOvers.remove()
-            totalWrite++
+            currentBuffer.buffer[fillOffset++] = leftOvers.remove()
         }
-        totalWrite += fill
 
-        fill = min(currentBuffer.buffer.size - index, buffer.buffer.size)
+        fill = min(currentBuffer.buffer.size - fillOffset, buffer.buffer.size)
 
         for (i in buffer.buffer.indices) {
-            if (ignoreCount > 0) {
-                ignoreCount--
-                continue
-            }
-
             if (i < fill) {
-                currentBuffer.buffer[index++] = buffer.buffer[i]
+                currentBuffer.buffer[fillOffset++] = buffer.buffer[i]
             } else {
                 leftOvers.add(buffer.buffer[i])
             }
-            totalWrite++
         }
 
-        if (index == size) {
+        if (fillOffset == size) {
             callback.buffered(this, currentBuffer)
             this.currentBuffer = null
-            index = 0
+            fillOffset = 0
         }
     }
 
@@ -102,6 +86,6 @@ class BufferSink(private val size: Int, bps: Int, private val callback: BufferSi
         val buffer = currentBuffer ?: return
         callback.buffered(this, buffer)
         this.currentBuffer = null
-        index = 0
+        fillOffset = 0
     }
 }

@@ -45,12 +45,18 @@ class ManagedAudioTrack(private val callback: ManagedAudioTrackCallback, private
         }
     }
 
+    fun discardBuffer() {
+        // https://developer.android.com/reference/android/media/AudioTrack.html#flush%28%29
+        val track = this.track ?: return
+        track.pause()
+        track.flush()
+
+        bytesWritten = 0
+        ready = false
+    }
+
     fun play() {
         track?.play()
-    }
-    
-    fun pause() {
-        track?.pause()
     }
 
     fun dispose() {

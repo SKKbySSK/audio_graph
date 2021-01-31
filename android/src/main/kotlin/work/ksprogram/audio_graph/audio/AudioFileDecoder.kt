@@ -22,10 +22,9 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
     private var bufferIndex: Int = 0
     private val decoder: Runnable
     private var decoderThread: Thread? = null
-    private var totalWrittenBytes: Int = 0
     private var disposed = false
     private var lastFormat: MediaFormat? = null
-    private var sought = false
+    private var seeking = false
     private var lastOffset: Long = 0
     private val lock = ReentrantLock()
     private var paused = false
@@ -78,7 +77,7 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
     }
 
     fun seekTo(timeUs: Long) {
-        sought = true
+        seeking = true
         lock.withLock {
             mediaExtractor.seekTo(timeUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
         }
@@ -95,7 +94,7 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
 
             // When sought or tha last buffer has BUFFER_FLAG_END_OF_STREAM flag
             if (needsRestart) {
-                if (!sought) {
+                if (!seeking) {
                     // Wait until seeking is completed
                     Thread.sleep(10)
                     continue
@@ -110,7 +109,7 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
                 mediaCodec.start()
                 this.mediaCodec = mediaCodec
                 needsRestart = false
-                sought = false
+                seeking = false
 
                 Log.i("AudioFileDecoder", "MediaCodec restarted")
             }
@@ -119,7 +118,7 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
                 fillMediaCodec()
             }
 
-            sought = false
+            seeking = false
             decodeBuffer()
         }
     }
@@ -155,23 +154,35 @@ class AudioFileDecoder(path: String, private val callback: AudioFileDecoderCallb
                 Log.i("AudioFileDecoder", "Format changed to ${sampleRate}Hz, ${channels}ch, ${bitRate}bits")
                 bitsPerSecond = sampleRate * channels * bitRate
 
-                callback.outputFormatChanged(format, lastFormat)
-                lastFormat = mediaCodec.outputFormat
+                if (!seeking) {
+                    lastFormat = mediaCodec.outputFormat
+                    callback.outputFormatChanged(format, lastFormat)
+                }
             }
-            MediaCodec.INFO_TRY_AGAIN_LATER -> { callback.decoderTimedOut() }
+            MediaCodec.INFO_TRY_AGAIN_LATER -> {
+                if (!seeking) {
+                    callback.decoderTimedOut()
+                }
+            }
             MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED ->{}
             else -> {
                 if (outIndex >= 0) {
                     val output = mediaCodec.getOutputBuffer(outIndex) as ByteBuffer
                     val buffer = ByteArray(bufferInfo.size)
-                    totalWrittenBytes += bufferInfo.size
                     output.get(buffer)
                     output.clear()
 
                     mediaCodec.releaseOutputBuffer(outIndex, false)
-                    callback.decoded(bufferInfo, buffer)
+
+                    if (!seeking) {
+                        callback.decoded(bufferInfo, buffer)
+                    }
                 }
             }
+        }
+
+        if (seeking) {
+            return
         }
 
         if (bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {

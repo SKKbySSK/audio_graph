@@ -58,6 +58,10 @@ class AudioMixerNode(id: Int) : AudioOutputNode(id), AudioMultipleInputNode, Out
         }
     }
 
+    override fun discardBuffer(node: AudioOutputNode) {
+        // Do nothing
+    }
+
     override fun prepare() {
     }
 

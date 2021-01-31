@@ -12,6 +12,7 @@ enum class PreparationState {
 interface OutputNodeCallback {
     fun prepared(node: AudioOutputNode)
     fun bufferAvailable(node: AudioOutputNode)
+    fun discardBuffer(node: AudioOutputNode)
 }
 
 abstract class AudioNativeNode(val id: Int) {

@@ -24,7 +24,6 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
             "build" -> {
                 val jsonGraphData = (call.arguments as ArrayList<Any>)[0] as String
                 val graphModel: AudioGraphModel = mapper.readValue(jsonGraphData)
-
                 val nodes: MutableList<AudioNativeNode> = mutableListOf()
                 for (node in graphModel.nodes) {
                     val nativeNode = when(node.name) {

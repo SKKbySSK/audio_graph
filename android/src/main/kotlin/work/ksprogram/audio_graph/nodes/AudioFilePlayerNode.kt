@@ -1,12 +1,17 @@
 package work.ksprogram.audio_graph.nodes
 
+import android.app.Application
 import android.media.MediaCodec
 import android.media.MediaFormat
+import android.os.Looper
 import android.util.Log
+import work.ksprogram.audio_graph.AudioFilePlugin
+import work.ksprogram.audio_graph.AudioGraphPlugin
 import work.ksprogram.audio_graph.audio.*
 import java.util.*
+import java.util.logging.Handler
 
-class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double = 0.2, private val maximumBufferCount: Int = 5): AudioOutputNode(id), PlayableNode, PositionableNode, AudioFileDecoderCallback, BufferSinkCallback {
+class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double = 0.2, private val maximumBufferCount: Int = 1): AudioOutputNode(id), PlayableNode, PositionableNode, AudioFileDecoderCallback, BufferSinkCallback {
     companion object {
         const val nodeName = "audio_file_player_node"
     }
@@ -23,11 +28,12 @@ class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double =
     override var positionUs: Long
         get() { return _posUs }
         set(value) {
-            buffers.clear()
-            bufferSink.reset()
             _posUs = value
             decoder.seekTo(value)
             decoder.resume()
+            buffers.clear()
+            bufferSink.reset()
+            callback?.discardBuffer(this)
         }
 
     init {
@@ -41,7 +47,13 @@ class AudioFilePlayerNode(id: Int, path: String, bufferDurationSeconds: Double =
     }
 
     override fun decoded(info: MediaCodec.BufferInfo, data: ByteArray) {
-        val eos = info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0
+        if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {
+            val handler = android.os.Handler(AudioGraphPlugin.context!!.mainLooper)
+            handler.post {
+                AudioFilePlugin.methodChannel?.invokeMethod("completed", id)
+            }
+        }
+
         bufferSink.append(AudioBuffer(info.presentationTimeUs, data))
     }
     

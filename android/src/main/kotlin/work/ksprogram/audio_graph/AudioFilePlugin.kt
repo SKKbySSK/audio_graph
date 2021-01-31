@@ -8,9 +8,10 @@ import io.flutter.plugin.common.MethodChannel
 import work.ksprogram.audio_graph.models.AudioFormat
 import java.util.ArrayList
 
-class AudioFilePlugin: MethodChannel.MethodCallHandler {
+class AudioFilePlugin(): MethodChannel.MethodCallHandler {
     companion object {
         val mapper = jacksonObjectMapper()
+        var methodChannel: MethodChannel? = null
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {

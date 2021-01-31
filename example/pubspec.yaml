@@ -3,7 +3,7 @@ description: Demonstrates how to use the audio_graph plugin.
 publish_to: 'none'
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -11,6 +11,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   path: ^1.7.0
   path_provider: ^1.6.27
+  eva_icons_flutter: ^2.0.1
+  url_launcher: ^5.7.10
 
 dev_dependencies:
   flutter_test:

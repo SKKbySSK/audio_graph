@@ -57,6 +57,7 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
     }
   }
   
+  let methodChannel: FlutterMethodChannel
   let inputConnections: [AudioNodeConnection]
   let outputConnections: [AudioNodeConnection]
   let shouldAttach: Bool = true
@@ -71,7 +72,8 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
   private let playerNode: AVAudioPlayerNode
   private var currentMedia: (urL: URL, file: AVAudioFile)?
   
-  init(_ node: AudioNode, inputConnections: [AudioNodeConnection], outputConnections: [AudioNodeConnection]) throws {
+  init(_ node: AudioNode, _ channel: FlutterMethodChannel, inputConnections: [AudioNodeConnection], outputConnections: [AudioNodeConnection]) throws {
+    self.methodChannel = channel
     guard node.name == AudioEngineFilePlayerNode.nodeName else { throw NSError() }
     self.node = node
     self.inputConnections = inputConnections
@@ -90,6 +92,7 @@ class AudioEngineFilePlayerNode: AudioEngineNode, AudioControllableNode, AudioVo
     }
     lastPosition = position
     playerNode.pause()
+    methodChannel.invokeMethod("completed", arguments: node.id)
   }
   
   func prepare() {

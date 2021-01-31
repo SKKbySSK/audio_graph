@@ -58,7 +58,11 @@ class _MyAppState extends State<MyApp> {
 
     for (final asset in assetFiles) {
       final path = await setupMusicFile(asset);
-      files.add(await AudioFilePlayerNode.createNode(path));
+      final node = await AudioFilePlayerNode.createNode(path);
+      node.completion = () {
+        print("${path} finished!");
+      };
+      files.add(node);
     }
 
     // AudioDeviceOutputNode is an output node to produce audio data to the speaker.

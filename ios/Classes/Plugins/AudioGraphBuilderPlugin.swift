@@ -66,7 +66,7 @@ public class AudioGraphBuilderPlugin: NSObject, FlutterPlugin {
   private func createEngineNode(_ node: AudioNode, engine: AVAudioEngine, inputConnections: [AudioNodeConnection], outputConnections: [AudioNodeConnection]) throws -> AudioEngineNode? {
     switch node.name {
     case AudioEngineFilePlayerNode.nodeName:
-      return try AudioEngineFilePlayerNode(node, inputConnections: inputConnections, outputConnections: outputConnections)
+      return try AudioEngineFilePlayerNode(node, SwiftAudioGraphPlugin.fileNodeChannel, inputConnections: inputConnections, outputConnections: outputConnections)
     case AudioEngineMixerNode.nodeName:
       return try AudioEngineMixerNode(node, inputConnections: inputConnections, outputConnections: outputConnections)
     case AudioEngineDeviceOutputNode.nodeName:

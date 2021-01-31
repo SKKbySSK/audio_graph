@@ -13,12 +13,25 @@ class AssetManager {
     'test3.mp3',
   ];
 
+  static final Map<String, String> _cachedSampleAssetItems = {};
+
   // Extract the asset data and export to the app's document directory
   static Future<String> exportMusicFile(String asset) async {
+    if (_cachedSampleAssetItems.containsKey(asset)) {
+      return _cachedSampleAssetItems[asset];
+    }
+
     final dir = await getApplicationDocumentsDirectory();
     final file = File('${dir.path}/$asset');
-    var data = await rootBundle.load('assets/$asset');
-    await file.writeAsBytes(data.buffer.asInt8List());
-    return file.path;
+
+    try {
+      var data = await rootBundle.load('assets/$asset');
+      await file.writeAsBytes(data.buffer.asInt8List());
+      _cachedSampleAssetItems[asset] = file.path;
+
+      return file.path;
+    } catch (_) {
+      return null;
+    }
   }
 }

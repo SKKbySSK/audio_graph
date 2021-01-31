@@ -157,7 +157,7 @@ class _SimplePlayerPageState extends State<SimplePlayerPage> {
   }
 
   Widget buildVolumeSlider(AudioFilePlayerNode file) {
-    final isMute = (file.volume <= 0);
+    final isMute = ((file?.volume ?? 0) <= 0);
 
     return Row(
       mainAxisSize: MainAxisSize.max,
@@ -190,7 +190,7 @@ class _SimplePlayerPageState extends State<SimplePlayerPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(path.basename(file.path)),
+        Text(path.basename(file?.path ?? "")),
         Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,

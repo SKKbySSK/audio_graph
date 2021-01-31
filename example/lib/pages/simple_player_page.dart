@@ -7,19 +7,17 @@ import 'package:audio_graph/audio_graph.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
-class MixerDemoPage extends StatefulWidget {
-  MixerDemoPage({Key key}) : super(key: key);
+class SimplePlayerPage extends StatefulWidget {
+  SimplePlayerPage({Key key}) : super(key: key);
 
   @override
-  _MixerDemoPageState createState() => _MixerDemoPageState();
+  _SimplePlayerPageState createState() => _SimplePlayerPageState();
 }
 
-class _MixerDemoPageState extends State<MixerDemoPage> {
+class _SimplePlayerPageState extends State<SimplePlayerPage> {
   AudioGraph graph;
-  List<AudioFilePlayerNode> files;
-  AudioMixerNode mixer;
+  AudioFilePlayerNode playerNode;
   bool ignoreUpdate = false;
-  bool playAll = true;
 
   @override
   void initState() {
@@ -27,48 +25,43 @@ class _MixerDemoPageState extends State<MixerDemoPage> {
     initAudioGraph();
   }
 
+  @override
+  void reassemble() {
+    // Rebuild the graph when hot reload is executed
+    graph?.dispose();
+    initAudioGraph();
+    super.reassemble();
+  }
+
+  @override
+  void dispose() {
+    graph?.dispose();
+    super.dispose();
+  }
+
   // Initialize the AudioGraph
   Future<void> initAudioGraph() async {
-    final List<AudioFilePlayerNode> files = List();
-
-    // Create AudioFilePlayerNodes from local files
-    final List<String> filePaths = List();
-
-    for (final path in filePaths) {
-      files.add(await AudioFilePlayerNode.createNode(path));
-    }
-
-    // Create AudioFilePlayerNodes from assets
-    for (final asset in AssetManager.sampleAssetItems) {
-      final path = await AssetManager.exportMusicFile(asset);
-      final node = await AudioFilePlayerNode.createNode(path);
-      node.completion = () {
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$asset finished!'),
-          ),
-        );
-      };
-      files.add(node);
-    }
+    // Create AudioFilePlayerNode from assets
+    final asset = AssetManager.sampleAssetItems[0];
+    final path = await AssetManager.exportMusicFile(asset);
+    final playerNode = await AudioFilePlayerNode.createNode(path);
+    playerNode.completion = () {
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$asset finished!'),
+        ),
+      );
+    };
 
     // AudioDeviceOutputNode is an output node to produce audio data to the speaker.
     final output = AudioDeviceOutputNode();
-    mixer = AudioMixerNode();
 
     // Add player, mixer, output nodes to the AudioGraphBuilder
     final builder = AudioGraphBuilder();
-    builder.nodes.addAll(files);
-    builder.nodes.addAll([mixer, output]);
-
-    // Connect the AudioFilePlayerNode to AudioMixerNode's next input pin.
-    // AudioGraph should look like this AudioFilePlayerNode -> AudioMixerNode
-    for (final file in files) {
-      builder.connect(file.outputPin, mixer.appendInputPin());
-    }
+    builder.nodes.addAll([playerNode, output]);
 
     // Connect the AudioMixerNode's output pin to AudioDeviceOutputNode's input pin
-    builder.connect(mixer.outputPin, output.inputPin);
+    builder.connect(playerNode.outputPin, output.inputPin);
 
     // Build the graph and receive it.
     // You MUST dispose the graph when you don't need it.
@@ -77,12 +70,17 @@ class _MixerDemoPageState extends State<MixerDemoPage> {
     } on PlatformException catch (e) {
       print(e.code);
       print(e.message);
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to build AudioGraph'),
+        ),
+      );
       return;
     }
 
-    // When the graph is ready, set files and rebuild UI.
+    // When the graph is ready, set node and rebuild UI.
     setState(() {
-      this.files = files;
+      this.playerNode = playerNode;
     });
 
     Timer.periodic(Duration(milliseconds: 200), (timer) async {
@@ -90,65 +88,29 @@ class _MixerDemoPageState extends State<MixerDemoPage> {
         return;
       }
 
-      for (final file in files) {
-        await file.updatePosition();
-      }
-
+      await playerNode.updatePosition();
       setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final fileTiles = files?.map((f) => buildListTile(f)) ?? [];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mixer Demo'),
       ),
-      body: ListView(
-        children: <Widget>[
-          buildMixerTile(),
-          ...fileTiles,
-        ],
-      ),
-    );
-  }
-
-  Widget buildMixerTile() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Center(
-            child: Text("Mixer"),
-          ),
-          Slider(
-            value: mixer?.volume ?? 0,
-            onChanged: (value) {
-              setState(() {
-                mixer?.volume = value;
-              });
-            },
-          ),
-          Divider(),
-        ],
-      ),
-    );
-  }
-
-  Widget buildListTile(AudioFilePlayerNode file) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: buildFileController(file),
-          ),
-          buildSeekBar(file),
-          buildVolumeSlider(file),
-          Divider(),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: buildFileController(playerNode),
+            ),
+            buildSeekBar(playerNode),
+            buildVolumeSlider(playerNode),
+          ],
+        ),
       ),
     );
   }
@@ -249,19 +211,5 @@ class _MixerDemoPageState extends State<MixerDemoPage> {
         ),
       ],
     );
-  }
-
-  @override
-  void reassemble() {
-    // Rebuild the graph when hot reload is executed
-    graph?.dispose();
-    initAudioGraph();
-    super.reassemble();
-  }
-
-  @override
-  void dispose() {
-    graph?.dispose();
-    super.dispose();
   }
 }

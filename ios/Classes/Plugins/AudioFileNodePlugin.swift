@@ -14,7 +14,11 @@ public class AudioFileNodePlugin: NSObject, FlutterPlugin {
   }
   
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    guard let path = (call.arguments as? [String])?.first else { return }
+    guard let path = (call.arguments as? [String])?.first else {
+      result(PluginError.createInvalidOperation(message: "There is no argument"))
+      return
+    }
+    
     let file = try! AVAudioFile(forReading: URL(fileURLWithPath: path))
     switch call.method {
     case "get_format":
@@ -24,6 +28,7 @@ public class AudioFileNodePlugin: NSObject, FlutterPlugin {
     case "get_duration":
       result(Double(file.length) / file.processingFormat.sampleRate)
     default:
+      result(FlutterMethodNotImplemented)
       break;
     }
   }

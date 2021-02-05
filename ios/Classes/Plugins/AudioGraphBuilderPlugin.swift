@@ -12,6 +12,7 @@ public class AudioGraphBuilderPlugin: NSObject, FlutterPlugin {
       guard let json = (call.arguments as? [String])?.first else { return }
       buildGraph(json, result: result)
     default:
+      result(FlutterMethodNotImplemented)
       break;
     }
   }
@@ -59,7 +60,7 @@ public class AudioGraphBuilderPlugin: NSObject, FlutterPlugin {
       AudioGraphManagerPlugin.graphs[id] = AudioGraphManagerPlugin.AudioGraph(engine: engine, nodes: nodes)
       result(id)
     } catch let error {
-      print(error)
+      result(PluginError.createGraphBuildFailed(details: error.localizedDescription))
     }
   }
   

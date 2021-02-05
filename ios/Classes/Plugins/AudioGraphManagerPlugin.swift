@@ -53,6 +53,7 @@ class AudioGraphManagerPlugin: NSObject, FlutterPlugin {
         result(false)
       }
     default:
+      result(FlutterMethodNotImplemented)
       break
     }
   }

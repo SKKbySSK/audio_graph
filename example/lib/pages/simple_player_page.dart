@@ -197,14 +197,16 @@ class _SimplePlayerPageState extends State<SimplePlayerPage> {
           children: [
             IconButton(
               icon: Icon(Icons.play_arrow_rounded),
-              onPressed: () {
-                file.play();
+              onPressed: () async {
+                await file.play();
+                print("[STATE] Playing");
               },
             ),
             IconButton(
               icon: Icon(Icons.pause_rounded),
-              onPressed: () {
-                file.pause();
+              onPressed: () async {
+                await file.pause();
+                print("[STATE] Paused");
               },
             ),
           ],

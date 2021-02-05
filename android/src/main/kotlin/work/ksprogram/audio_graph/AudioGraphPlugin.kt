@@ -37,7 +37,9 @@ class AudioGraphPlugin: FlutterPlugin, MethodCallHandler {
       "dispose" -> {
         val id = (call.arguments as ArrayList<Any>)[0] as Int
         AudioGraph.graphs[id]?.dispose()
+        result.success(null)
       }
+      else -> result.notImplemented()
     }
   }
 

@@ -34,6 +34,7 @@ class AudioFilePlugin(): MethodChannel.MethodCallHandler {
                 val json = mapper.writeValueAsString(AudioFormat(channels, sampleRate))
                 result.success(json)
             }
+            else -> result.notImplemented()
         }
     }
 }

@@ -37,7 +37,6 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
                         nativeNode.prepare()
                     }
 
-                    print(nativeNode)
                     nodes.add(nativeNode)
                 }
 
@@ -81,6 +80,7 @@ class AudioGraphBuilderPlugin: MethodChannel.MethodCallHandler, AudioGraphCallba
 
                 result.success(id)
             }
+            else -> result.notImplemented()
         }
     }
     

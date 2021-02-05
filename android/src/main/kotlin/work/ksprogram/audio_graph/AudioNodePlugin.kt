@@ -17,34 +17,54 @@ class AudioNodePlugin: MethodChannel.MethodCallHandler {
         when(call.method) {
             "volume" -> {
                 if (node is AudioOutputNode) {
-                    node.volume = args[1] as Double
+                    val volume = args[1] as Double
+                    node.volume = volume
+                    result.success(volume)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
             "get_position" -> {
                 if (node is PositionableNode) {
                     result.success(node.positionUs * 1e-6)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
             "set_position" -> {
                 if (node is PositionableNode) {
-                    node.positionUs = ((args[1] as Double) * 1e6).toLong()
+                    val pos = args[1] as Double
+                    node.positionUs = (pos * 1e6).toLong()
+                    result.success(pos)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
             "prepare" -> {
                 if (node is AudioOutputNode) {
                     node.prepare()
+                    result.success(null)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
             "play" -> {
                 if (node is PlayableNode) {
                     node.play()
+                    result.success(null)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
             "pause" -> {
                 if (node is PlayableNode) {
                     node.pause()
+                    result.success(null)
+                    return
                 }
+                result.error(PluginError.invalidOperation, null, null)
             }
+            else -> result.notImplemented()
         }
     }
 }
